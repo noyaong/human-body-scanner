@@ -7,11 +7,14 @@ export interface BodyPart {
   relatedSymptoms: string[];
 }
 
+export type Gender = 'male' | 'female';
+
 export interface ScannerState {
   selectedPart: string | null;
   isScanning: boolean;
   scanProgress: number;
   hoveredPart: string | null;
+  gender: Gender;
 }
 
 export interface SymptomRecord {

@@ -9,8 +9,9 @@ interface HumanModelProps {
   onPartClick?: (partId: string) => void;
 }
 
-// Bone 이름과 부위 ID 매핑
+// Bone 이름과 부위 ID 매핑 (여러 명명 규칙 지원)
 const BONE_TO_PART_MAP: Record<string, string> = {
+  // Mixamo 명명 규칙 (Xbot 등)
   mixamorigHead: 'head',
   mixamorigNeck: 'neck',
   mixamorigSpine2: 'chest',
@@ -31,7 +32,109 @@ const BONE_TO_PART_MAP: Record<string, string> = {
   mixamorigRightUpLeg: 'rightThigh',
   mixamorigRightLeg: 'rightKnee',
   mixamorigRightFoot: 'rightFoot',
+
+  // 일반적인 명명 규칙 (Head, Neck 등)
+  Head: 'head',
+  Neck: 'neck',
+  Spine2: 'chest',
+  Spine1: 'upperBack',
+  Spine: 'lowerBack',
+  Hips: 'abdomen',
+  LeftShoulder: 'leftShoulder',
+  LeftArm: 'leftArm',
+  LeftForeArm: 'leftForeArm',
+  LeftHand: 'leftHand',
+  RightShoulder: 'rightShoulder',
+  RightArm: 'rightArm',
+  RightForeArm: 'rightForeArm',
+  RightHand: 'rightHand',
+  LeftUpLeg: 'leftThigh',
+  LeftLeg: 'leftKnee',
+  LeftFoot: 'leftFoot',
+  RightUpLeg: 'rightThigh',
+  RightLeg: 'rightKnee',
+  RightFoot: 'rightFoot',
+
+  // 언더스코어 명명 규칙
+  head: 'head',
+  neck: 'neck',
+  spine_02: 'chest',
+  spine_01: 'upperBack',
+  spine: 'lowerBack',
+  pelvis: 'abdomen',
+  hips: 'abdomen',
+  clavicle_l: 'leftShoulder',
+  upperarm_l: 'leftArm',
+  lowerarm_l: 'leftForeArm',
+  hand_l: 'leftHand',
+  clavicle_r: 'rightShoulder',
+  upperarm_r: 'rightArm',
+  lowerarm_r: 'rightForeArm',
+  hand_r: 'rightHand',
+  thigh_l: 'leftThigh',
+  calf_l: 'leftKnee',
+  foot_l: 'leftFoot',
+  thigh_r: 'rightThigh',
+  calf_r: 'rightKnee',
+  foot_r: 'rightFoot',
+
+  // UE/Unity 스타일
+  upper_arm_l: 'leftArm',
+  lower_arm_l: 'leftForeArm',
+  upper_arm_r: 'rightArm',
+  lower_arm_r: 'rightForeArm',
+  upper_leg_l: 'leftThigh',
+  lower_leg_l: 'leftKnee',
+  upper_leg_r: 'rightThigh',
+  lower_leg_r: 'rightKnee',
 };
+
+// Bone 이름에서 부위 ID 찾기 (부분 매칭 지원)
+function findPartIdFromBoneName(boneName: string): string | null {
+  // 정확한 매칭 먼저
+  if (BONE_TO_PART_MAP[boneName]) {
+    return BONE_TO_PART_MAP[boneName];
+  }
+
+  // 소문자로 변환해서 부분 매칭
+  const lowerName = boneName.toLowerCase();
+
+  // 키워드 기반 매칭
+  if (lowerName.includes('head')) return 'head';
+  if (lowerName.includes('neck')) return 'neck';
+  if (lowerName.includes('spine2') || lowerName.includes('spine_02') || lowerName.includes('chest')) return 'chest';
+  if (lowerName.includes('spine1') || lowerName.includes('spine_01')) return 'upperBack';
+  if (lowerName.includes('spine') && !lowerName.includes('1') && !lowerName.includes('2')) return 'lowerBack';
+  if (lowerName.includes('hip') || lowerName.includes('pelvis')) return 'abdomen';
+
+  // 왼쪽 팔
+  if ((lowerName.includes('left') || lowerName.includes('_l')) && lowerName.includes('shoulder') || lowerName.includes('clavicle')) {
+    if (lowerName.includes('left') || lowerName.includes('_l')) return 'leftShoulder';
+  }
+  if ((lowerName.includes('left') || lowerName.includes('_l')) && (lowerName.includes('upper') && lowerName.includes('arm'))) return 'leftArm';
+  if ((lowerName.includes('left') || lowerName.includes('_l')) && (lowerName.includes('fore') || lowerName.includes('lower')) && lowerName.includes('arm')) return 'leftForeArm';
+  if ((lowerName.includes('left') || lowerName.includes('_l')) && lowerName.includes('hand')) return 'leftHand';
+
+  // 오른쪽 팔
+  if ((lowerName.includes('right') || lowerName.includes('_r')) && lowerName.includes('shoulder') || lowerName.includes('clavicle')) {
+    if (lowerName.includes('right') || lowerName.includes('_r')) return 'rightShoulder';
+  }
+  if ((lowerName.includes('right') || lowerName.includes('_r')) && (lowerName.includes('upper') && lowerName.includes('arm'))) return 'rightArm';
+  if ((lowerName.includes('right') || lowerName.includes('_r')) && (lowerName.includes('fore') || lowerName.includes('lower')) && lowerName.includes('arm')) return 'rightForeArm';
+  if ((lowerName.includes('right') || lowerName.includes('_r')) && lowerName.includes('hand')) return 'rightHand';
+
+  // 왼쪽 다리
+  if ((lowerName.includes('left') || lowerName.includes('_l')) && (lowerName.includes('thigh') || lowerName.includes('upleg') || lowerName.includes('upper_leg'))) return 'leftThigh';
+  if ((lowerName.includes('left') || lowerName.includes('_l')) && (lowerName.includes('calf') || lowerName.includes('leg') || lowerName.includes('shin'))) return 'leftKnee';
+  if ((lowerName.includes('left') || lowerName.includes('_l')) && lowerName.includes('foot')) return 'leftFoot';
+
+  // 오른쪽 다리
+  if ((lowerName.includes('right') || lowerName.includes('_r')) && (lowerName.includes('thigh') || lowerName.includes('upleg') || lowerName.includes('upper_leg'))) return 'rightThigh';
+  if ((lowerName.includes('right') || lowerName.includes('_r')) && (lowerName.includes('calf') || lowerName.includes('leg') || lowerName.includes('shin'))) return 'rightKnee';
+  if ((lowerName.includes('right') || lowerName.includes('_r')) && lowerName.includes('foot')) return 'rightFoot';
+
+  return null;
+}
 
 // 부위별 하이라이트 반경
 const PART_RADIUS: Record<string, number> = {
@@ -95,74 +198,88 @@ function createHologramMaterial(): THREE.ShaderMaterial {
         float selectedIntensity = 1.0 - smoothstep(0.0, uHighlightRadius, distFromSelected);
         bool isSelected = uHighlightCenter.y > -50.0 && selectedIntensity > 0.01;
 
-        // 호버 영역 계산
+        // 호버 영역 계산 (더 넓은 범위로)
         float distFromHovered = distance(vWorldPosition, uHoveredCenter);
-        float hoveredIntensity = 1.0 - smoothstep(0.0, uHighlightRadius * 0.8, distFromHovered);
+        float hoveredIntensity = 1.0 - smoothstep(0.0, uHighlightRadius * 1.2, distFromHovered);
         bool isHovered = uHoveredCenter.y > -50.0 && hoveredIntensity > 0.01 && !isSelected;
 
-        // 기본 홀로그램 파란색
-        vec3 baseColor = vec3(0.1, 0.3, 0.8);
+        // 기본 홀로그램 색상 (Bloom을 위해 더 밝게)
+        vec3 baseColor = vec3(0.05, 0.15, 0.4);
+        vec3 emissive = vec3(0.0);
 
         if (isSelected) {
           // 선택: 밝은 빨강/오렌지 + 펄스
           float pulse = 0.7 + sin(uTime * 6.0) * 0.3;
-          vec3 selectColor = vec3(1.0, 0.15, 0.05);
+          vec3 selectColor = vec3(1.0, 0.2, 0.1);
           baseColor = mix(baseColor, selectColor, selectedIntensity * pulse);
+          // 선택 시 강한 emissive 추가
+          emissive += selectColor * selectedIntensity * pulse * 2.0;
         } else if (isHovered) {
-          // 호버: 밝은 시안
-          vec3 hoverColor = vec3(0.2, 0.9, 1.0);
-          baseColor = mix(baseColor, hoverColor, hoveredIntensity * 0.85);
+          // 호버: 밝은 노란색/주황색 (기본 파란색과 확실히 구분)
+          float hoverPulse = 0.7 + sin(uTime * 6.0) * 0.3;
+          vec3 hoverColor = vec3(1.0, 0.8, 0.2);
+          baseColor = mix(baseColor, hoverColor, hoveredIntensity * hoverPulse);
+          // 호버 시 매우 강한 emissive
+          emissive += hoverColor * hoveredIntensity * hoverPulse * 3.0;
         }
 
-        // Fresnel 가장자리 발광
-        vec3 fresnelGlow = isSelected ? vec3(1.0, 0.5, 0.2) : vec3(0.0, 1.0, 1.0);
-        vec3 finalColor = baseColor + fresnel * fresnelGlow * 0.7;
+        // Fresnel 가장자리 발광 (Bloom의 핵심!)
+        vec3 fresnelGlow = isSelected ? vec3(1.0, 0.4, 0.1) : vec3(0.0, 0.8, 1.0);
+        float fresnelEmissive = pow(fresnel, 1.5) * 2.5;
+        emissive += fresnelGlow * fresnelEmissive;
 
-        // 선택 글로우
+        // 선택 글로우 (더 강하게)
         if (isSelected) {
-          float glowPulse = 0.5 + sin(uTime * 4.0) * 0.3;
-          finalColor += vec3(1.0, 0.3, 0.1) * selectedIntensity * glowPulse;
+          float glowPulse = 0.6 + sin(uTime * 4.0) * 0.4;
+          emissive += vec3(1.0, 0.3, 0.05) * selectedIntensity * glowPulse * 1.5;
         }
 
-        // 호버 글로우
+        // 호버 글로우 (매우 강하게)
         if (isHovered) {
-          float hoverGlow = 0.3 + sin(uTime * 3.0) * 0.15;
-          finalColor += vec3(0.0, 0.6, 0.7) * hoveredIntensity * hoverGlow;
+          float hoverGlow = 0.7 + sin(uTime * 5.0) * 0.3;
+          emissive += vec3(1.0, 0.7, 0.1) * hoveredIntensity * hoverGlow * 2.5;
         }
 
-        // 스캔 라인
-        float scanWidth = 0.15;
+        // 스캔 라인 (강한 발광)
+        float scanWidth = 0.12;
         float distFromScan = abs(vWorldPosition.y - uScanY);
-        float scanIntensity = uScanActive ? smoothstep(scanWidth, 0.0, distFromScan) * 1.5 : 0.0;
-        finalColor += vec3(0.0, 1.0, 1.0) * scanIntensity;
+        float scanIntensity = uScanActive ? smoothstep(scanWidth, 0.0, distFromScan) : 0.0;
+        emissive += vec3(0.2, 1.0, 1.0) * scanIntensity * 3.0;
 
         // 홀로그램 수평선 패턴
-        float linePattern = sin(vWorldPosition.y * 100.0 + uTime * 2.0) * 0.5 + 0.5;
-        linePattern = smoothstep(0.4, 0.6, linePattern);
-        finalColor += vec3(0.0, 0.3, 0.4) * linePattern * 0.08;
+        float linePattern = sin(vWorldPosition.y * 80.0 + uTime * 2.0) * 0.5 + 0.5;
+        linePattern = smoothstep(0.45, 0.55, linePattern);
+        emissive += vec3(0.0, 0.4, 0.5) * linePattern * 0.15;
+
+        // 최종 색상 = 베이스 + emissive
+        vec3 finalColor = baseColor + emissive;
 
         // 불투명도
-        float opacity = 0.7 + fresnel * 0.25;
-        opacity += isSelected ? selectedIntensity * 0.3 : 0.0;
-        opacity += isHovered ? hoveredIntensity * 0.2 : 0.0;
-        opacity += scanIntensity * 0.3;
+        float opacity = 0.75 + fresnel * 0.2;
+        opacity += isSelected ? selectedIntensity * 0.25 : 0.0;
+        opacity += isHovered ? hoveredIntensity * 0.15 : 0.0;
+        opacity += scanIntensity * 0.25;
 
         gl_FragColor = vec4(finalColor, opacity);
       }
     `,
     transparent: true,
     side: THREE.DoubleSide,
-    depthWrite: false,
-    blending: THREE.NormalBlending,
+    depthWrite: true,
+    blending: THREE.AdditiveBlending,
   });
 }
+
+// 성별별 모델 경로
+const MODEL_PATHS = {
+  male: '/models/male.glb',
+  female: '/models/female.glb',
+} as const;
 
 export function HumanModel({ onPartClick }: HumanModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const materialsRef = useRef<THREE.ShaderMaterial[]>([]);
   const skeletonRef = useRef<THREE.Skeleton | null>(null);
-
-  const { scene } = useGLTF('/models/Xbot.glb');
 
   const {
     selectedPart,
@@ -171,12 +288,22 @@ export function HumanModel({ onPartClick }: HumanModelProps) {
     setHoveredPart,
     isScanning,
     scanProgress,
+    gender,
   } = useScannerStore();
+
+  // 성별에 따른 모델 로드
+  const { scene } = useGLTF(MODEL_PATHS[gender]);
 
   // 위치 추적
   const selectedPositionRef = useRef(new THREE.Vector3(0, -100, 0));
   const hoveredPositionRef = useRef(new THREE.Vector3(0, -100, 0));
   const selectedRadiusRef = useRef(0.3);
+
+  // 성별 변경 시 위치 초기화
+  useEffect(() => {
+    selectedPositionRef.current.set(0, -100, 0);
+    hoveredPositionRef.current.set(0, -100, 0);
+  }, [gender]);
 
   // 모델 복제 및 머티리얼 적용
   const processedScene = useMemo(() => {
@@ -299,7 +426,8 @@ export function HumanModel({ onPartClick }: HumanModelProps) {
 
     if (closestBone) {
       const boneName = (closestBone as THREE.Bone).name;
-      const partId = BONE_TO_PART_MAP[boneName] || findBodyPartByMeshName(boneName)?.id;
+      // 새로운 유연한 매칭 함수 사용
+      const partId = findPartIdFromBoneName(boneName) || findBodyPartByMeshName(boneName)?.id;
       if (partId) {
         const bonePos = new THREE.Vector3();
         (closestBone as THREE.Bone).getWorldPosition(bonePos);
@@ -376,4 +504,6 @@ export function HumanModel({ onPartClick }: HumanModelProps) {
   );
 }
 
-useGLTF.preload('/models/Xbot.glb');
+// 두 모델 모두 프리로드
+useGLTF.preload(MODEL_PATHS.male);
+useGLTF.preload(MODEL_PATHS.female);

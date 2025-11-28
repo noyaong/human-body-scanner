@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { Suspense } from 'react';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { HumanModel, ScanEffect, Lighting, Environment } from './Scene';
 
 function LoadingFallback() {
@@ -43,6 +44,16 @@ export function Canvas3D() {
         maxPolarAngle={Math.PI / 1.5}
         target={[0, 1, 0]}
       />
+
+      {/* Unreal Bloom Post-processing */}
+      <EffectComposer multisampling={0}>
+        <Bloom
+          intensity={1.0}
+          luminanceThreshold={0.15}
+          luminanceSmoothing={0.9}
+          mipmapBlur={true}
+        />
+      </EffectComposer>
     </Canvas>
   );
 }

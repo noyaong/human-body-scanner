@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useScannerStore } from '@/stores/scannerStore';
 import { BODY_PARTS } from '@/constants/bodyParts';
-import { Search, X, Syringe, BarChart3, History, Trash2 } from 'lucide-react';
+import { Search, X, Syringe, BarChart3, History, Trash2, User } from 'lucide-react';
 import { SymptomModal } from './SymptomModal';
 
 export function ControlPanel() {
@@ -13,6 +13,8 @@ export function ControlPanel() {
     setSelectedPart,
     symptoms,
     removeSymptom,
+    gender,
+    setGender,
   } = useScannerStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,6 +32,40 @@ export function ControlPanel() {
           <span className="text-2xl">🔬</span>
           Body Scanner
         </h2>
+
+        {/* Gender Selection */}
+        <div className="flex items-center gap-2 bg-gray-800/50 rounded-xl p-1">
+          <button
+            onClick={() => setGender('male')}
+            className={`
+              flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg
+              font-medium text-sm transition-all duration-200
+              ${
+                gender === 'male'
+                  ? 'bg-cyan-600 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+              }
+            `}
+          >
+            <User size={16} />
+            남성
+          </button>
+          <button
+            onClick={() => setGender('female')}
+            className={`
+              flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg
+              font-medium text-sm transition-all duration-200
+              ${
+                gender === 'female'
+                  ? 'bg-pink-500 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+              }
+            `}
+          >
+            <User size={16} />
+            여성
+          </button>
+        </div>
 
         {/* Scan Button */}
         <button
